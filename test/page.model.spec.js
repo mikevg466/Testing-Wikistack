@@ -1,10 +1,26 @@
 const Page = require('../models').Page;
 const chai = require ('chai');
 const expect = chai.expect;
+const Promise = require('bluebird');
+
 Page.sync({force: true});
-
 describe("Page Model", function(){
+  var page2;
+  before(function(done){
 
+        let page = Page.build({title: "test title", content: "#content header"});
+        page.set('tags','find, me, you, sir');
+        page2 = Page.build({title: "another title2", content: "#content header"});
+        page2.set('tags','find, to, be, you, sir');
+        var page3 = Page.build({title: "grocery list", content: "#content header"});
+        page3.set('tags','cheese, chicken, bread, groceries');
+
+        Promise.all([page.save(),page2.save(),page3.save()]).then(()=>done());
+        // page.save()  //Promise.all??
+        // .then(()=> page2.save())
+        // .then(()=>done()); // the data needs to be saved to db... db calls are async
+
+      })
   describe("Validations", function(){
 
     it("has 5 given columns: title, urlTitle, content, status, and tags", function(){
@@ -47,19 +63,17 @@ describe("Page Model", function(){
   });
 
   describe('Class methods', function () {
-    before(function(done){
-      page = Page.build({title: "test title", content: "#content header"});
-      page.set('tags','find, me, you, sir');
-      page2 = Page.build({title: "another title2", content: "#content header"});
-      page2.set('tags','find, to, be, you, sir');
+    // before(function(done){
+    //   page = Page.build({title: "test title", content: "#content header"});
+    //   page.set('tags','find, me, you, sir');
+    //   var page2 = Page.build({title: "another title2", content: "#content header"});
+    //   page2.set('tags','find, to, be, you, sir');
 
-      page.save()  //Promise.all??
-      .then(()=> page2.save())
-      .then(()=>done()); // the data needs to be saved to db... db calls are async
+    //   page.save()  //Promise.all??
+    //   .then(()=> page2.save())
+    //   .then(()=>done()); // the data needs to be saved to db... db calls are async
 
-
-      page2.save().then(()=>done());
-    })
+    // })
     describe('findByTag', function () {
       it('gets pages with the search tag',(done)=>{
         Page.findByTag('me').spread(values=>expect(values.title).to.equal('test title')).then(()=>done());
@@ -75,9 +89,16 @@ describe("Page Model", function(){
 
   describe('Instance methods', function () {
     describe('findSimilar', function () {
-      it('never gets itself');
-      it('gets other pages with any common tags');
-      it('does not get other pages without any common tags');
+
+      it('never gets itself',()=>{
+        page2.findSimilar().then(vals=>console.log(vals));
+      });
+      it('gets other pages with any common tags',()=>{
+
+      });
+      it('does not get other pages without any common tags',()=>{
+
+      });
     });
   });
 
